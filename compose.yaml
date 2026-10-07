@@ -7,6 +7,7 @@ services:
       BOOKSTORE_HOST: 0.0.0.0
       BOOKSTORE_PORT: 8765
       BOOKSTORE_DB: /data/bookstore.db
+      BOOKSTORE_ADMIN_TOKEN: ${BOOKSTORE_ADMIN_TOKEN:-}
     volumes:
       - bookstore-data:/data
     healthcheck:

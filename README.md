@@ -8,15 +8,17 @@ A small JSON bookstore backend built with Python's standard library and SQLite. 
 python3 app.py
 ```
 
-The server listens on `http://127.0.0.1:8765` and creates `bookstore.db` in the current directory. Set `BOOKSTORE_HOST`, `BOOKSTORE_PORT`, or `BOOKSTORE_DB` to configure the bind address, port, or database path.
+The server listens on `http://127.0.0.1:8765` and creates `bookstore.db` in the current directory. Set `BOOKSTORE_HOST`, `BOOKSTORE_PORT`, or `BOOKSTORE_DB` to configure the bind address, port, or database path. Set `BOOKSTORE_ADMIN_TOKEN` to enable admin permission checks on `/health`.
 
 ## API
 
 All request bodies are JSON. Prices are returned as decimal strings.
 
+The health endpoint remains available to monitoring probes. Its `permissions.admin` field is `true` only when the request includes `Authorization: Bearer <BOOKSTORE_ADMIN_TOKEN>` and a token is configured; otherwise it is `false`. For Compose, set `BOOKSTORE_ADMIN_TOKEN` in the environment before starting the service.
+
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/health` | Check server status |
+| `GET` | `/health` | Check server status and admin permission |
 | `GET` | `/books` | List books and stock |
 | `GET` | `/books/{id}` | Get one book |
 | `POST` | `/carts` | Create an empty cart |

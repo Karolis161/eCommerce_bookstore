@@ -1,3 +1,4 @@
+import hmac
 import json
 import os
 import sqlite3
@@ -77,8 +78,13 @@ def book_json(row):
 
 
 class BookstoreServer(ThreadingHTTPServer):
-    def __init__(self, address, database_path):
+    def __init__(self, address, database_path, admin_token=None):
         self.database_path = database_path
+        self.admin_token = (
+            os.environ.get("BOOKSTORE_ADMIN_TOKEN", "")
+            if admin_token is None
+            else admin_token
+        )
         super().__init__(address, BookstoreHandler)
 
 
@@ -103,12 +109,30 @@ class BookstoreHandler(BaseHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError):
             raise ValueError("Request body must be a JSON object") from None
 
+    def has_admin_permission(self):
+        configured_token = self.server.admin_token
+        if not configured_token:
+            return False
+        scheme, separator, token = self.headers.get("Authorization", "").partition(" ")
+        return (
+            separator == " "
+            and scheme.lower() == "bearer"
+            and hmac.compare_digest(token, configured_token)
+        )
+
     def do_GET(self):
         path = urlparse(self.path).path.rstrip("/") or "/"
         parts = path.split("/")
         with connect(self.server.database_path) as connection:
             if path == "/" or path == "/health":
-                self.send_json(200, {"status": "ok", "service": "bookstore-api"})
+                self.send_json(
+                    200,
+                    {
+                        "status": "ok",
+                        "service": "bookstore-api",
+                        "permissions": {"admin": self.has_admin_permission()},
+                    },
+                )
             elif path == "/books":
                 rows = connection.execute("SELECT * FROM books ORDER BY id").fetchall()
                 self.send_json(200, {"books": [book_json(row) for row in rows]})
