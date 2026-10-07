@@ -1,0 +1,5 @@
+__pycache__/
+*.py[cod]
+bookstore.db
+bookstore.db-*
+.DS_Store
