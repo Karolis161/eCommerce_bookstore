@@ -8,7 +8,7 @@ A small JSON bookstore backend built with Python's standard library and SQLite. 
 python3 app.py
 ```
 
-The server listens on `http://127.0.0.1:8765` and creates `bookstore.db` in the current directory. Set `BOOKSTORE_PORT` to change the port or `BOOKSTORE_DB` to change the database path.
+The server listens on `http://127.0.0.1:8765` and creates `bookstore.db` in the current directory. Set `BOOKSTORE_HOST`, `BOOKSTORE_PORT`, or `BOOKSTORE_DB` to configure the bind address, port, or database path.
 
 ## API
 
@@ -38,3 +38,13 @@ curl -X POST http://127.0.0.1:8765/carts/1/checkout -H 'Content-Type: applicatio
 ```bash
 python3 -m unittest -v
 ```
+
+## Container
+
+The container files use a non-root runtime user and keep SQLite data in a named volume. The Compose port is bound to localhost only.
+
+```bash
+docker compose up --build
+```
+
+The API is then available at `http://127.0.0.1:8765`. Stop it with `Ctrl+C`; the named `bookstore-data` volume keeps the database for the next run. These files can also be checked without starting a container with `docker compose config`.

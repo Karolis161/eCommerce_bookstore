@@ -1,0 +1,23 @@
+services:
+  bookstore:
+    build: .
+    ports:
+      - "127.0.0.1:8765:8765"
+    environment:
+      BOOKSTORE_HOST: 0.0.0.0
+      BOOKSTORE_PORT: 8765
+      BOOKSTORE_DB: /data/bookstore.db
+    volumes:
+      - bookstore-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=2)"
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  bookstore-data:
